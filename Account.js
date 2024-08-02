@@ -37,7 +37,7 @@ class Account {
     }
     // 전체 출력문
     toString() {
-        return `${this.number},${this.owner},${this.password},${this.balance}`;
+        return `${this.number},${this.owner},${this.balance}`;
     }
 }
 // const account = new Account("1111", "A", "1234", "10000");

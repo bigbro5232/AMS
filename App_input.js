@@ -53,9 +53,11 @@ const app = async function () {
                 let minusBalance = 0;
                 if (no === 1) {
                     account = new Account(accountNum, accountOwner, password, balance);
+                    accountRepository.addAcount(account);
                 } else {
                     minusBalance = parseInt(await readLine("- 대출금액 : "));
                     account = new MinusAccount(accountNum, accountOwner, password, balance, minusBalance);
+                    accountRepository.addAcount(account);
                 }
                 console.log(accountNum, accountOwner, password, balance, minusBalance);
                 // 신규 계좌 등록
@@ -63,16 +65,14 @@ const app = async function () {
                 break;
             case 2: // 전체계좌 목록 출력
                 console.log("-------------------------------------------------------");
-                console.log("계좌구분 \t 계좌번호 \t 예금주 \t 잔액");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
                 const allList = accountRepository.findByAll();
                 allList.forEach((account) => {
                     if (account instanceof MinusAccount) {
-                        console.log("마이너스계좌");
+                        console.log(`마이너스계좌 \t ${account.toString()}`);
                     } else {
-                        console.log("입출금계좌");
+                        console.log(`입출금계좌 \t ${account.toString()}`);
                     }
-
-                    console.log(account.toString());
                 });
                 ("-------------------------------------------------------");
                 console.log("계좌 목록 출력~~~~");

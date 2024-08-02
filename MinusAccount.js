@@ -70,7 +70,7 @@ class MinusAccount extends Account {
     // toString() 재정의
     // Account클래스에서 상속받아온 toString()메서드 활용
     toString() {
-        super.toString() + process.stdout.write(`,${this.minusBalance}`);
+        return `${this.number},${this.owner},${this.balance},${this.minusBalance}`;
     }
     // getBalance() 재정의
     getBalance() {
