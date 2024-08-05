@@ -2,8 +2,19 @@ const { createInterface } = require("readline");
 const Account = require("./Account");
 const MinusAccount = require("./MinusAccount");
 const AccountRepository = require("./AccountRepository");
+const { readFile } = require("fs");
 const accountRepository = new AccountRepository();
+const fs = require("fs").promises;
+const constants = require("fs").constants;
 // 키보드 입력을 위한 인터페이스 생성
+
+/*
+어플리케이션 실행시 계좌 정보를 (ams.json)json파일로 존재여부 확인 후
+있으면 parse메서드로 읽어서 AccountRepository배열에 초기화 시키고,
+없으면 빈 (ams.json)json파일 생성 
+json 파일의 내용은 내부의 내용처리 끝나고 마지막에 실행을 종료할 때
+업데이트하는 개념으로 처리, 실시간으로 싱크를 맞춰서 만드는건 보류.
+*/
 const consoleInterface = createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -33,6 +44,13 @@ const app = async function () {
 
     let running = true;
     while (running) {
+        fs.access('./account.json',constants.F_OK|constants.W_OK|constants.R_OK)
+        .then(()=>{
+            return fs.readFile('./account.json')
+        })
+        .then((data)=>{
+            // 여기까지 08/05
+        })
         printMenu();
         let menuNum = parseInt(await readLine("> "));
         switch (menuNum) {
@@ -51,6 +69,13 @@ const app = async function () {
                 let password = parseInt(await readLine("- 비밀번호 : "));
                 let balance = parseInt(await readLine("- 입금액 : "));
                 let minusBalance = 0;
+                function result(acc) {
+                    if (acc instanceof MinusAccount) {
+                        console.log(`마이너스계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance} \t ${acc.minusBalance}`);
+                    } else {
+                        console.log(`입출금계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance}`);
+                    }
+                }
                 if (no === 1) {
                     account = new Account(accountNum, accountOwner, password, balance);
                     accountRepository.addAcount(account);
@@ -59,27 +84,18 @@ const app = async function () {
                     account = new MinusAccount(accountNum, accountOwner, password, balance, minusBalance);
                     accountRepository.addAcount(account);
                 }
+
                 // 신규 계좌 등록
-                console.log("신규 계좌 등록 결과 메시지 출력");
+                // console.log("신규 계좌 등록 결과 메시지 출력");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액 \t 대출금액");
-                // console.log(accountNum, accountOwner, password, balance, minusBalance);
-                if (account instanceof MinusAccount) {
-                    console.log(`마이너스계좌 \t ${account.toString()}`);
-                } else {
-                    console.log(`입출금계좌 \t ${account.toString()}`);
-                }
+                result(account);
                 break;
             case 2: // 전체계좌 목록 출력
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
                 const allList = accountRepository.findByAll();
-                console.log("계좌 목록 출력~~~~");
                 allList.forEach((account) => {
-                    if (account instanceof MinusAccount) {
-                        console.log(`마이너스계좌 \t ${account.toString()}`);
-                    } else {
-                        console.log(`입출금계좌 \t ${account.toString()}`);
-                    }
+                    result(account);
                 });
                 ("-------------------------------------------------------");
                 break;
@@ -87,10 +103,16 @@ const app = async function () {
                 // 계좌번호와 입금액 입력 받아 입금 처리
                 let inputNo = await readLine("- 계좌번호 : ");
                 let inputMoney = parseInt(await readLine("- 입금액 : "));
-                const addMoney = accountRepository.findByNumber(inputNo);
+                // const allAcc = accountRepository.findByAll();
+                let addMoney = accountRepository.findByNumber(inputNo);
+                // if (inputNo === allAcc.number) {
                 addMoney.deposit(inputMoney);
-                console.log(inputNo, inputMoney);
-                console.log("입금에 따른 메시지 출력");
+                // } else {
+                //     inputNo = await readLine("- 틀린 계좌번호, 다시입력 : ");
+                //     return;
+                // }
+                // console.log(inputNo, inputMoney);
+                // console.log("입금에 따른 메시지 출력");
                 console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
                 break;
             case 4: // 출금
@@ -99,8 +121,8 @@ const app = async function () {
                 let outputMoney = parseInt(await readLine("- 출금액 : "));
                 const minusMoney = accountRepository.findByNumber(outputNo);
                 minusMoney.withdraw(outputMoney);
-                console.log(outputNo, outputMoney);
-                console.log("출금에 따른 메시지 출력");
+                // console.log(outputNo, outputMoney);
+                // console.log("출금에 따른 메시지 출력");
                 console.log(`잔액 :  ${minusMoney.getBalance().toString()}`);
                 break;
             case 5: // 계좌번호로 검색
@@ -108,14 +130,10 @@ const app = async function () {
                 let searchNum = await readLine("- 계좌번호 : ");
                 const findNumber = accountRepository.findByNumber(searchNum);
                 console.log(searchNum);
-                console.log("검색 결과 출력");
+                // console.log("검색 결과 출력");
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
-                if (findNumber instanceof MinusAccount) {
-                    console.log(`마이너스계좌 \t ${findNumber.toString()}`);
-                } else {
-                    console.log(`입출금계좌 \t ${findNumber.toString()}`);
-                }
+                result(findNumber);
                 break;
             case 6:
                 console.log("계좌 삭제");
@@ -123,16 +141,13 @@ const app = async function () {
                 let deleteNum = await readLine("- 계좌번호 : ");
                 accountRepository.deleteAccount(deleteNum);
                 console.log(deleteNum);
-                console.log("삭제 결과 출력");
-                console.log("계좌 목록 출력~~~~");
+                // console.log("삭제 결과 출력");
+                // console.log("계좌 목록 출력~~~~");
+                console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
                 const aList = accountRepository.findByAll();
                 aList.forEach((account) => {
-                    if (account instanceof MinusAccount) {
-                        console.log(`마이너스계좌 \t ${account.toString()}`);
-                    } else {
-                        console.log(`입출금계좌 \t ${account.toString()}`);
-                    }
+                    result(account);
                 });
                 ("-------------------------------------------------------");
                 break;
