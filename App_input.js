@@ -59,14 +59,21 @@ const app = async function () {
                     account = new MinusAccount(accountNum, accountOwner, password, balance, minusBalance);
                     accountRepository.addAcount(account);
                 }
-                console.log(accountNum, accountOwner, password, balance, minusBalance);
                 // 신규 계좌 등록
                 console.log("신규 계좌 등록 결과 메시지 출력");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액 \t 대출금액");
+                // console.log(accountNum, accountOwner, password, balance, minusBalance);
+                if (account instanceof MinusAccount) {
+                    console.log(`마이너스계좌 \t ${account.toString()}`);
+                } else {
+                    console.log(`입출금계좌 \t ${account.toString()}`);
+                }
                 break;
             case 2: // 전체계좌 목록 출력
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
                 const allList = accountRepository.findByAll();
+                console.log("계좌 목록 출력~~~~");
                 allList.forEach((account) => {
                     if (account instanceof MinusAccount) {
                         console.log(`마이너스계좌 \t ${account.toString()}`);
@@ -75,34 +82,59 @@ const app = async function () {
                     }
                 });
                 ("-------------------------------------------------------");
-                console.log("계좌 목록 출력~~~~");
                 break;
             case 3: // 입금
                 // 계좌번호와 입금액 입력 받아 입금 처리
                 let inputNo = await readLine("- 계좌번호 : ");
                 let inputMoney = parseInt(await readLine("- 입금액 : "));
+                const addMoney = accountRepository.findByNumber(inputNo);
+                addMoney.deposit(inputMoney);
                 console.log(inputNo, inputMoney);
                 console.log("입금에 따른 메시지 출력");
+                console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
                 break;
             case 4: // 출금
                 // 계좌번호와 출금액 입력 받아 출금 처리
                 let outputNo = await readLine("- 계좌번호 : ");
                 let outputMoney = parseInt(await readLine("- 출금액 : "));
+                const minusMoney = accountRepository.findByNumber(outputNo);
+                minusMoney.withdraw(outputMoney);
                 console.log(outputNo, outputMoney);
                 console.log("출금에 따른 메시지 출력");
+                console.log(`잔액 :  ${minusMoney.getBalance().toString()}`);
                 break;
             case 5: // 계좌번호로 검색
                 // 계좌 번호 입력 받아 계좌 정보 출력
                 let searchNum = await readLine("- 계좌번호 : ");
+                const findNumber = accountRepository.findByNumber(searchNum);
                 console.log(searchNum);
                 console.log("검색 결과 출력");
+                console.log("-------------------------------------------------------");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
+                if (findNumber instanceof MinusAccount) {
+                    console.log(`마이너스계좌 \t ${findNumber.toString()}`);
+                } else {
+                    console.log(`입출금계좌 \t ${findNumber.toString()}`);
+                }
                 break;
             case 6:
                 console.log("계좌 삭제");
                 // 계좌 번호 입력 받아 계좌 해당 계좌 삭제
                 let deleteNum = await readLine("- 계좌번호 : ");
+                accountRepository.deleteAccount(deleteNum);
                 console.log(deleteNum);
                 console.log("삭제 결과 출력");
+                console.log("계좌 목록 출력~~~~");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
+                const aList = accountRepository.findByAll();
+                aList.forEach((account) => {
+                    if (account instanceof MinusAccount) {
+                        console.log(`마이너스계좌 \t ${account.toString()}`);
+                    } else {
+                        console.log(`입출금계좌 \t ${account.toString()}`);
+                    }
+                });
+                ("-------------------------------------------------------");
                 break;
             case 7:
                 console.log(">>> 프로그램을 종료합니다.");
