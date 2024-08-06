@@ -1,20 +1,12 @@
 const { createInterface } = require("readline");
+const fs = require("fs").promises;
+const constants = require("fs").constants;
 const Account = require("./Account");
 const MinusAccount = require("./MinusAccount");
 const AccountRepository = require("./AccountRepository");
-const { readFile } = require("fs");
 const accountRepository = new AccountRepository();
-const fs = require("fs").promises;
-const constants = require("fs").constants;
-// 키보드 입력을 위한 인터페이스 생성
 
-/*
-어플리케이션 실행시 계좌 정보를 (ams.json)json파일로 존재여부 확인 후
-있으면 parse메서드로 읽어서 AccountRepository배열에 초기화 시키고,
-없으면 빈 (ams.json)json파일 생성 
-json 파일의 내용은 내부의 내용처리 끝나고 마지막에 실행을 종료할 때
-업데이트하는 개념으로 처리, 실시간으로 싱크를 맞춰서 만드는건 보류.
-*/
+// 키보드 입력을 위한 인터페이스 생성
 const consoleInterface = createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -25,8 +17,7 @@ const readLine = function (message) {
     return new Promise((resolve) => {
         consoleInterface.question(message, (userInput) => {
             resolve(userInput);
-        }); 2
-
+        });
     });
 }
 
@@ -37,20 +28,64 @@ const printMenu = function () {
     console.log("--------------------------------------------------------------------");
 }
 
+// JSON 파일을 읽어 AccountRepository 객체 초기화
+const start = function () {
+    fs.access('./ams.json', constants.F_OK)
+        .then(() => {
+            return fs.readFile('./ams.json');
+        })
+        .then((data) => {
+            const accounts = JSON.parse(data);
+            accounts.forEach(acc => {
+                if (acc.minusBalance !== undefined) {
+                    accountRepository.addAcount(new MinusAccount(acc.number, acc.owner, acc.password, acc.balance, acc.minusBalance));
+                } else {
+                    accountRepository.addAcount(new Account(acc.number, acc.owner, acc.password, acc.balance));
+                }
+            });
+        })
+        .catch((err) => {
+            if (err.code === 'ENOENT') {
+                return fs.writeFile('./ams.json', JSON.stringify([]));
+            } else {
+                throw err;
+            }
+        });
+};
+
+
+// 현재 상태를 JSON 파일에 저장
+const save = async function () {
+    const accounts = accountRepository.findByAll().map(acc => {
+        if (acc instanceof MinusAccount) {
+            return {
+                number: acc.number,
+                owner: acc.owner,
+                password: acc.password,
+                balance: acc.balance,
+                minusBalance: acc.minusBalance
+            };
+        } else {
+            return {
+                number: acc.number,
+                owner: acc.owner,
+                password: acc.password,
+                balance: acc.balance
+            };
+        }
+    });
+    await fs.writeFile('./ams.json', JSON.stringify(accounts, null, 2));
+}
+
 const app = async function () {
+    await start();
+
     console.log(`====================================================================`);
     console.log(`--------------     KOSTA 은행 계좌 관리 프로그램     ---------------`);
     console.log(`====================================================================`);
 
     let running = true;
     while (running) {
-        fs.access('./account.json',constants.F_OK|constants.W_OK|constants.R_OK)
-        .then(()=>{
-            return fs.readFile('./account.json')
-        })
-        .then((data)=>{
-            // 여기까지 08/05
-        })
         printMenu();
         let menuNum = parseInt(await readLine("> "));
         switch (menuNum) {
@@ -86,7 +121,6 @@ const app = async function () {
                 }
 
                 // 신규 계좌 등록
-                // console.log("신규 계좌 등록 결과 메시지 출력");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액 \t 대출금액");
                 result(account);
                 break;
@@ -97,22 +131,14 @@ const app = async function () {
                 allList.forEach((account) => {
                     result(account);
                 });
-                ("-------------------------------------------------------");
+                console.log("-------------------------------------------------------");
                 break;
             case 3: // 입금
                 // 계좌번호와 입금액 입력 받아 입금 처리
                 let inputNo = await readLine("- 계좌번호 : ");
                 let inputMoney = parseInt(await readLine("- 입금액 : "));
-                // const allAcc = accountRepository.findByAll();
                 let addMoney = accountRepository.findByNumber(inputNo);
-                // if (inputNo === allAcc.number) {
                 addMoney.deposit(inputMoney);
-                // } else {
-                //     inputNo = await readLine("- 틀린 계좌번호, 다시입력 : ");
-                //     return;
-                // }
-                // console.log(inputNo, inputMoney);
-                // console.log("입금에 따른 메시지 출력");
                 console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
                 break;
             case 4: // 출금
@@ -121,16 +147,12 @@ const app = async function () {
                 let outputMoney = parseInt(await readLine("- 출금액 : "));
                 const minusMoney = accountRepository.findByNumber(outputNo);
                 minusMoney.withdraw(outputMoney);
-                // console.log(outputNo, outputMoney);
-                // console.log("출금에 따른 메시지 출력");
                 console.log(`잔액 :  ${minusMoney.getBalance().toString()}`);
                 break;
             case 5: // 계좌번호로 검색
                 // 계좌 번호 입력 받아 계좌 정보 출력
                 let searchNum = await readLine("- 계좌번호 : ");
                 const findNumber = accountRepository.findByNumber(searchNum);
-                console.log(searchNum);
-                // console.log("검색 결과 출력");
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
                 result(findNumber);
@@ -140,19 +162,17 @@ const app = async function () {
                 // 계좌 번호 입력 받아 계좌 해당 계좌 삭제
                 let deleteNum = await readLine("- 계좌번호 : ");
                 accountRepository.deleteAccount(deleteNum);
-                console.log(deleteNum);
-                // console.log("삭제 결과 출력");
-                // console.log("계좌 목록 출력~~~~");
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
                 const aList = accountRepository.findByAll();
                 aList.forEach((account) => {
                     result(account);
                 });
-                ("-------------------------------------------------------");
+                console.log("-------------------------------------------------------");
                 break;
             case 7:
                 console.log(">>> 프로그램을 종료합니다.");
+                await save();
                 consoleInterface.close();
                 running = false;
                 break;
