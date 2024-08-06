@@ -7,6 +7,30 @@ const accountRepository = new AccountRepository();
 const fs = require("fs").promises;
 const constants = require("fs").constants;
 // 키보드 입력을 위한 인터페이스 생성
+const fs = require('fs');
+const filePath = 'example.txt';
+
+fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+        // 파일이 존재하지 않으면 빈 파일 생성
+        fs.open(filePath, 'w', (err, fd) => {
+            if (err) {
+                return console.error(`Error opening file: ${err.message}`);
+            }
+
+            console.log(`${filePath} has been created`);
+
+            // 파일을 열고 나서 파일 디스크립터를 닫아야 합니다.
+            fs.close(fd, (err) => {
+                if (err) {
+                    return console.error(`Error closing file: ${err.message}`);
+                }
+            });
+        });
+    } else {
+        console.log(`${filePath} already exists`);
+    }
+});
 
 /*
 어플리케이션 실행시 계좌 정보를 (ams.json)json파일로 존재여부 확인 후
