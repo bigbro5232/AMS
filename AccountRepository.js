@@ -137,5 +137,14 @@ class AccountRepository {
         }
         return false;
     }
+    // 계좌 삭제하기
+    deleteAccount(number) {
+        let index = this.accounts.findIndex((account) => account.number === number)
+        if (index != -1) {
+            return this.accounts.splice(index, 1);
+        }
+        return null;
+
+    }
 }
 module.exports = AccountRepository;

@@ -78,7 +78,7 @@ const save = async function () {
 }
 
 const app = async function () {
-    start();
+    await start();
 
     console.log(`====================================================================`);
     console.log(`--------------     KOSTA 은행 계좌 관리 프로그램     ---------------`);
@@ -172,7 +172,7 @@ const app = async function () {
                 break;
             case 7:
                 console.log(">>> 프로그램을 종료합니다.");
-                save();
+                await save();
                 consoleInterface.close();
                 running = false;
                 break;

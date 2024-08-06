@@ -11,5 +11,11 @@
     "password": 2,
     "balance": 2,
     "minusBalance": 2
+  },
+  {
+    "number": "1",
+    "owner": "1",
+    "password": 1,
+    "balance": 1
   }
 ]
