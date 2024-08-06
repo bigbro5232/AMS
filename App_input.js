@@ -29,31 +29,33 @@ const printMenu = function () {
 }
 
 // JSON 파일을 읽어 AccountRepository 객체 초기화
-const initializeAccountRepository = async function () {
-    try {
-        await fs.access('./ams.json', constants.F_OK | constants.W_OK | constants.R_OK);
-        const data = await fs.readFile('./ams.json');
-        const accounts = JSON.parse(data);
-        accounts.forEach(acc => {
-            if (acc.minusBalance !== undefined) {
-                accountRepository.addAcount(new MinusAccount(acc.number, acc.owner, acc.password, acc.balance, acc.minusBalance));
+const start = function () {
+    fs.access('./ams.json', constants.F_OK)
+        .then(() => {
+            return fs.readFile('./ams.json');
+        })
+        .then((data) => {
+            const accounts = JSON.parse(data);
+            accounts.forEach(acc => {
+                if (acc.minusBalance !== undefined) {
+                    accountRepository.addAcount(new MinusAccount(acc.number, acc.owner, acc.password, acc.balance, acc.minusBalance));
+                } else {
+                    accountRepository.addAcount(new Account(acc.number, acc.owner, acc.password, acc.balance));
+                }
+            });
+        })
+        .catch((err) => {
+            if (err.code === 'ENOENT') {
+                return fs.writeFile('./ams.json', JSON.stringify([]));
             } else {
-                accountRepository.addAcount(new Account(acc.number, acc.owner, acc.password, acc.balance));
+                throw err;
             }
         });
-        console.log("AccountRepository initialized from ams.json");
-    } catch (err) {
-        if (err.code === 'ENOENT') {
-            await fs.writeFile('./ams.json', JSON.stringify([]), 'utf8');
-            console.log("ams.json file created.");
-        } else {
-            throw err;
-        }
-    }
-}
+};
+
 
 // 현재 상태를 JSON 파일에 저장
-const saveAccountRepository = async function () {
+const save = async function () {
     const accounts = accountRepository.findByAll().map(acc => {
         if (acc instanceof MinusAccount) {
             return {
@@ -72,12 +74,11 @@ const saveAccountRepository = async function () {
             };
         }
     });
-    await fs.writeFile('./ams.json', JSON.stringify(accounts, null, 2), 'utf8');
-    console.log("AccountRepository saved to ams.json");
+    await fs.writeFile('./ams.json', JSON.stringify(accounts, null, 2));
 }
 
 const app = async function () {
-    await initializeAccountRepository();
+    await start();
 
     console.log(`====================================================================`);
     console.log(`--------------     KOSTA 은행 계좌 관리 프로그램     ---------------`);
@@ -171,7 +172,7 @@ const app = async function () {
                 break;
             case 7:
                 console.log(">>> 프로그램을 종료합니다.");
-                await saveAccountRepository();
+                await save();
                 consoleInterface.close();
                 running = false;
                 break;
