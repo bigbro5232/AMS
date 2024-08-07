@@ -46,7 +46,7 @@ const start = function () {
         })
         .catch((err) => {
             if (err.code === 'ENOENT') {
-                return fs.writeFile('./ams.json', null);
+                return fs.writeFile('./ams.json', JSON.stringify([]));
             } else {
                 console.log(err.message);
             }
@@ -138,31 +138,33 @@ const app = async function () {
                 break;
             case 3: // 입금
                 // 계좌번호와 입금액 입력 받아 입금 처리
-                let inputNo;
-                let findAccAdd = false;
-                while (!findAccAdd) {
-                    inputNo = await readLine("- 계좌번호 : ");
-                    findAccAdd = accountRepository.findByAll().find((account) => account.number === inputNo);
-                    if (!findAccAdd) {
-                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
-                    }
-                }
+                let inputNo = await readLine("- 계좌번호 : ");
                 let inputMoney = parseInt(await readLine("- 입금액 : "));
                 let addMoney = accountRepository.findByNumber(inputNo);
                 addMoney.deposit(inputMoney);
                 console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
                 break;
-            case 4: // 출금
-                // 계좌번호와 출금액 입력 받아 출금 처리
-                let outputNo;
-                let findAccMinus = false;
-                while (!findAccMinus) {
-                    outputNo = await readLine("- 계좌번호 : ");
-                    findAccMinus = accountRepository.findByAll().find((account) => account.number === outputNo);
-                    if (!findAccMinus) {
-                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
+            case 3: // 입금
+                let inputNo;
+                let accountExists = false;
+
+                while (!accountExists) {
+                    inputNo = await readLine("- 계좌번호 : ");
+                    accountExists = accountRepository.findByAll().find(acc => acc.number === inputNo);
+                    if (!accountExists) {
+                        console.log("계좌번호가 존재하지 않습니다. 다시 입력해주세요.");
                     }
                 }
+
+                let inputMoney = parseInt(await readLine("- 입금액 : "));
+                let addMoney = accountRepository.findByNumber(inputNo);
+                addMoney.deposit(inputMoney);
+                console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
+                break;
+
+            case 4: // 출금
+                // 계좌번호와 출금액 입력 받아 출금 처리
+                let outputNo = await readLine("- 계좌번호 : ");
                 let outputMoney = parseInt(await readLine("- 출금액 : "));
                 const minusMoney = accountRepository.findByNumber(outputNo);
                 minusMoney.withdraw(outputMoney);
