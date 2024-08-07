@@ -1,21 +1,21 @@
 [
   {
-    "number": "1",
-    "owner": "1",
-    "password": 1,
-    "balance": 1
+    "number": "12345678",
+    "owner": "조하영",
+    "password": 1234,
+    "balance": 10000
   },
   {
-    "number": "2",
-    "owner": "2",
-    "password": 2,
-    "balance": 2,
-    "minusBalance": 2
+    "number": "23456789",
+    "owner": "홍길동",
+    "password": 1234,
+    "balance": 1000000,
+    "minusBalance": 10
   },
   {
-    "number": "1",
-    "owner": "1",
-    "password": 1,
-    "balance": 1
+    "number": "11111111",
+    "owner": "A",
+    "password": 1234,
+    "balance": 1234567
   }
 ]

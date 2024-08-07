@@ -48,11 +48,10 @@ const start = function () {
             if (err.code === 'ENOENT') {
                 return fs.writeFile('./ams.json', JSON.stringify([]));
             } else {
-                throw err;
+                console.log(err.message);
             }
         });
 };
-
 
 // 현재 상태를 JSON 파일에 저장
 const save = async function () {
@@ -77,8 +76,19 @@ const save = async function () {
     await fs.writeFile('./ams.json', JSON.stringify(accounts, null, 2));
 }
 
+// 출력문
+function result(acc) {
+    if (acc instanceof MinusAccount) {
+        console.log(`마이너스계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance} \t ${acc.minusBalance}`);
+    } else {
+        console.log(`입출금계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance}`);
+    }
+}
+
+// const createAccount = function () { }
+
 const app = async function () {
-    await start();
+    start();
 
     console.log(`====================================================================`);
     console.log(`--------------     KOSTA 은행 계좌 관리 프로그램     ---------------`);
@@ -97,20 +107,13 @@ const app = async function () {
                     "1. 입출금계좌 | 2. 마이너스 계좌\n" +
                     "--------------------------------";
                 console.log(header);
-                let account = null; //입력갑 대입시 Acccount 또는 Minusaccoun에 등록될 배열 값
+                let account = null;
                 let no = parseInt(await readLine("> "));
                 let accountNum = await readLine("- 계좌번호 : ");
                 let accountOwner = await readLine("- 예금주명 : ");
                 let password = parseInt(await readLine("- 비밀번호 : "));
                 let balance = parseInt(await readLine("- 입금액 : "));
                 let minusBalance = 0;
-                function result(acc) {
-                    if (acc instanceof MinusAccount) {
-                        console.log(`마이너스계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance} \t ${acc.minusBalance}`);
-                    } else {
-                        console.log(`입출금계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance}`);
-                    }
-                }
                 if (no === 1) {
                     account = new Account(accountNum, accountOwner, password, balance);
                     accountRepository.addAcount(account);
@@ -172,7 +175,7 @@ const app = async function () {
                 break;
             case 7:
                 console.log(">>> 프로그램을 종료합니다.");
-                await save();
+                save();
                 consoleInterface.close();
                 running = false;
                 break;
