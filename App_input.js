@@ -144,6 +144,24 @@ const app = async function () {
                 addMoney.deposit(inputMoney);
                 console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
                 break;
+                case 3: // 입금
+    let inputNo;
+    let accountExists = false;
+
+    while (!accountExists) {
+        inputNo = await readLine("- 계좌번호 : ");
+        accountExists = accountRepository.findByAll().find(acc => acc.number === inputNo);
+        if (!accountExists) {
+            console.log("계좌번호가 존재하지 않습니다. 다시 입력해주세요.");
+        }
+    }
+
+    let inputMoney = parseInt(await readLine("- 입금액 : "));
+    let addMoney = accountRepository.findByNumber(inputNo);
+    addMoney.deposit(inputMoney);
+    console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
+    break;
+
             case 4: // 출금
                 // 계좌번호와 출금액 입력 받아 출금 처리
                 let outputNo = await readLine("- 계좌번호 : ");
