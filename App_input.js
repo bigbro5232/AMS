@@ -46,7 +46,7 @@ const start = function () {
         })
         .catch((err) => {
             if (err.code === 'ENOENT') {
-                return fs.writeFile('./ams.json', JSON.stringify([]));
+                return fs.writeFile('./ams.json', null);
             } else {
                 console.log(err.message);
             }
@@ -84,8 +84,6 @@ function result(acc) {
         console.log(`입출금계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance}`);
     }
 }
-
-// const createAccount = function () { }
 
 const app = async function () {
     start();
@@ -138,33 +136,31 @@ const app = async function () {
                 break;
             case 3: // 입금
                 // 계좌번호와 입금액 입력 받아 입금 처리
-                let inputNo = await readLine("- 계좌번호 : ");
-                let inputMoney = parseInt(await readLine("- 입금액 : "));
-                let addMoney = accountRepository.findByNumber(inputNo);
-                addMoney.deposit(inputMoney);
-                console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
-                break;
-            case 3: // 입금
                 let inputNo;
-                let accountExists = false;
-
-                while (!accountExists) {
+                let findAccAdd = false;
+                while (!findAccAdd) {
                     inputNo = await readLine("- 계좌번호 : ");
-                    accountExists = accountRepository.findByAll().find(acc => acc.number === inputNo);
-                    if (!accountExists) {
-                        console.log("계좌번호가 존재하지 않습니다. 다시 입력해주세요.");
+                    findAccAdd = accountRepository.findByAll().find((account) => account.number === inputNo);
+                    if (!findAccAdd) {
+                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
                     }
                 }
-
                 let inputMoney = parseInt(await readLine("- 입금액 : "));
                 let addMoney = accountRepository.findByNumber(inputNo);
                 addMoney.deposit(inputMoney);
                 console.log(`잔액 :  ${addMoney.getBalance().toString()}`);
                 break;
-
             case 4: // 출금
                 // 계좌번호와 출금액 입력 받아 출금 처리
-                let outputNo = await readLine("- 계좌번호 : ");
+                let outputNo;
+                let findAccMinus = false;
+                while (!findAccMinus) {
+                    outputNo = await readLine("- 계좌번호 : ");
+                    findAccMinus = accountRepository.findByAll().find((account) => account.number === outputNo);
+                    if (!findAccMinus) {
+                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
+                    }
+                }
                 let outputMoney = parseInt(await readLine("- 출금액 : "));
                 const minusMoney = accountRepository.findByNumber(outputNo);
                 minusMoney.withdraw(outputMoney);
@@ -172,7 +168,15 @@ const app = async function () {
                 break;
             case 5: // 계좌번호로 검색
                 // 계좌 번호 입력 받아 계좌 정보 출력
-                let searchNum = await readLine("- 계좌번호 : ");
+                let searchNum
+                let findAccSearch = false;
+                while (!findAccSearch) {
+                    searchNum = await readLine("- 계좌번호 : ");
+                    findAccSearch = accountRepository.findByAll().find((account) => account.number === searchNum);
+                    if (!findAccSearch) {
+                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
+                    }
+                }
                 const findNumber = accountRepository.findByNumber(searchNum);
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
@@ -181,7 +185,15 @@ const app = async function () {
             case 6:
                 console.log("계좌 삭제");
                 // 계좌 번호 입력 받아 계좌 해당 계좌 삭제
-                let deleteNum = await readLine("- 계좌번호 : ");
+                let deleteNum
+                let findAccDelete = false;
+                while (!findAccDelete) {
+                    deleteNum = await readLine("- 계좌번호 : ");
+                    findAccDelete = accountRepository.findByAll().find((account) => account.number === deleteNum);
+                    if (!findAccDelete) {
+                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
+                    }
+                }
                 accountRepository.deleteAccount(deleteNum);
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
