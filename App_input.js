@@ -4,8 +4,6 @@ const constants = require("fs").constants;
 const Account = require("./Account");
 const MinusAccount = require("./MinusAccount");
 const AccountRepository = require("./AccountRepository");
-const { readlink } = require("fs");
-const { Readline } = require("readline/promises");
 const accountRepository = new AccountRepository();
 
 // 키보드 입력을 위한 인터페이스 생성
@@ -158,12 +156,12 @@ const app = async function () {
                 }
 
                 // 신규 계좌 등록
-                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액 \t 대출금액");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t 잔액 \t 대출금액");
                 result(account);
                 break;
             case 2: // 전체계좌 목록 출력
                 console.log("-------------------------------------------------------");
-                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t 잔액");
                 const allList = accountRepository.findByAll();
                 allList.forEach((account) => {
                     result(account);
@@ -215,7 +213,7 @@ const app = async function () {
                 }
                 const findNumber = accountRepository.findByNumber(searchNum);
                 console.log("-------------------------------------------------------");
-                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t 잔액");
                 result(findNumber);
                 break;
             case 6:
@@ -232,7 +230,7 @@ const app = async function () {
                 }
                 accountRepository.deleteAccount(deleteNum);
                 console.log("-------------------------------------------------------");
-                console.log("계좌구분 \t 계좌번호 \t 예금주 \t  잔액");
+                console.log("계좌구분 \t 계좌번호 \t 예금주 \t 잔액");
                 const aList = accountRepository.findByAll();
                 aList.forEach((account) => {
                     result(account);
