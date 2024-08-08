@@ -31,7 +31,7 @@ const printMenu = function () {
 }
 
 // JSON 파일을 읽어 AccountRepository 객체 초기화
-const start = function () {
+function start() {
     fs.access('./ams.json', constants.F_OK)
         .then(() => {
             return fs.readFile('./ams.json');
@@ -56,7 +56,7 @@ const start = function () {
 };
 
 // 현재 상태를 JSON 파일에 저장
-const save = async function () {
+async function save() {
     const accounts = accountRepository.findByAll().map(acc => {
         if (acc instanceof MinusAccount) {
             return {
@@ -86,18 +86,7 @@ function result(acc) {
         console.log(`입출금계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance}`);
     }
 }
-async function getValidAccountNumber(promptMessage, errorMessage) {
-    let accountNumber;
-    let valid = false;
-    while (!valid) {
-        accountNumber = await readLine(promptMessage);
-        valid = accountRepository.findByAll().some(account => account.number === accountNumber);
-        if (!valid) {
-            console.log(errorMessage);
-        }
-    }
-    return accountNumber;
-}
+
 const app = async function () {
     start();
 
@@ -184,11 +173,11 @@ const app = async function () {
             case 3: // 입금
                 // 계좌번호와 입금액 입력 받아 입금 처리
                 let inputNo;
-                let findAccAdd = false;
-                while (!findAccAdd) {
+                let findAccount = false;
+                while (!findAccount) {
                     inputNo = await readLine("- 계좌번호 : ");
-                    findAccAdd = accountRepository.findByAll().find((account) => account.number === inputNo);
-                    if (!findAccAdd) {
+                    findAccount = accountRepository.findByAll().find((account) => account.number === inputNo);
+                    if (!findAccount) {
                         console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
                     }
                 }
@@ -215,7 +204,7 @@ const app = async function () {
                 break;
             case 5: // 계좌번호로 검색
                 // 계좌 번호 입력 받아 계좌 정보 출력
-                let searchNum
+                let searchNum;
                 let findAccSearch = false;
                 while (!findAccSearch) {
                     searchNum = await readLine("- 계좌번호 : ");
@@ -232,7 +221,7 @@ const app = async function () {
             case 6:
                 console.log("계좌 삭제");
                 // 계좌 번호 입력 받아 계좌 해당 계좌 삭제
-                let deleteNum
+                let deleteNum;
                 let findAccDelete = false;
                 while (!findAccDelete) {
                     deleteNum = await readLine("- 계좌번호 : ");
