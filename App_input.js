@@ -86,7 +86,18 @@ function result(acc) {
         console.log(`입출금계좌 \t ${acc.number} \t ${acc.owner} \t ${acc.balance}`);
     }
 }
-
+async function getValidAccountNumber(promptMessage, errorMessage) {
+    let accountNumber;
+    let valid = false;
+    while (!valid) {
+        accountNumber = await readLine(promptMessage);
+        valid = accountRepository.findByAll().some(account => account.number === accountNumber);
+        if (!valid) {
+            console.log(errorMessage);
+        }
+    }
+    return accountNumber;
+}
 const app = async function () {
     start();
 
