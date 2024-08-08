@@ -46,7 +46,7 @@ function start() {
         })
         .catch((err) => {
             if (err.code === 'ENOENT') {
-                return fs.writeFile('./ams.json', null);
+                return fs.writeFile('./ams.json', JSON.stringify([]));
             } else {
                 console.log(err.message);
             }
@@ -85,6 +85,31 @@ function result(acc) {
     }
 }
 
+// 계좌 입력 오류시 출력문
+async function errorAccount() {
+    while (true) {
+        const inputNo = await readLine("- 계좌번호 : ");
+        const findAccount = accountRepository.findByAll().find((account) => account.number === inputNo);
+        if (findAccount) {
+            return inputNo;
+        } else {
+            console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
+        }
+    }
+}
+
+// 정규 표현식 입력문
+async function inputValid(inputMsg, errMsg, iValue) {
+    while (true) {
+        iValid = await readLine(inputMsg);
+        if (iValue.test(iValid)) {
+            return iValid;
+        } else {
+            console.log(errMsg);
+        }
+    }
+}
+
 const app = async function () {
     start();
 
@@ -115,35 +140,9 @@ const app = async function () {
                         console.log("잘못 선택하셨습니다.");
                     }
                 }
-                let accountNum;
-                while (true) {
-                    // 임의로 계좌번호는 8자리로 고정
-                    accountNum = await readLine("계좌번호 8자리를 입력해 주세요 : ");
-                    if (/^\d{8}$/.test(accountNum)) {
-                        break;
-                    } else {
-                        console.log("계좌번호는 8자리 숫자여야 합니다.");
-                    }
-                }
-                let accountOwner;
-                while (true) {
-                    accountOwner = await readLine("- 예금주명 : ");
-                    if (/^\W{2,}$/.test(accountOwner)) {
-                        break;
-                    } else {
-                        console.log("이름은 2자리 이상이여야 합니다.");
-                    }
-                }
-                let password;
-                while (true) {
-                    password = await readLine("비밀번호 4자리를 입력해 주세요 : ");
-                    if (/^\d{4}$/.test(password)) {
-                        break;
-                    } else {
-                        console.log("비밀번호는 4자리 숫자여야 합니다.");
-
-                    }
-                }
+                let accountNum = await inputValid("- 계좌번호 : ", "계좌번호는 8자리 숫자여야 합니다.", /^\d{8}$/);
+                let accountOwner = await inputValid("- 예금주명 : ", "이름은 2자리 이상이여야 합니다.", /^\W{2,}$/);
+                let password = await inputValid("- 비밀번호 : ", "비밀번호는 4자리 숫자여야 합니다.", /^\d{4}$/);
                 let balance = parseInt(await readLine("- 입금액 : "));
                 let minusBalance = 0;
                 if (no === 1) {
@@ -170,15 +169,7 @@ const app = async function () {
                 break;
             case 3: // 입금
                 // 계좌번호와 입금액 입력 받아 입금 처리
-                let inputNo;
-                let findAccount = false;
-                while (!findAccount) {
-                    inputNo = await readLine("- 계좌번호 : ");
-                    findAccount = accountRepository.findByAll().find((account) => account.number === inputNo);
-                    if (!findAccount) {
-                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
-                    }
-                }
+                let inputNo = await errorAccount();
                 let inputMoney = parseInt(await readLine("- 입금액 : "));
                 let addMoney = accountRepository.findByNumber(inputNo);
                 addMoney.deposit(inputMoney);
@@ -186,15 +177,7 @@ const app = async function () {
                 break;
             case 4: // 출금
                 // 계좌번호와 출금액 입력 받아 출금 처리
-                let outputNo;
-                let findAccMinus = false;
-                while (!findAccMinus) {
-                    outputNo = await readLine("- 계좌번호 : ");
-                    findAccMinus = accountRepository.findByAll().find((account) => account.number === outputNo);
-                    if (!findAccMinus) {
-                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
-                    }
-                }
+                let outputNo = await errorAccount();
                 let outputMoney = parseInt(await readLine("- 출금액 : "));
                 const minusMoney = accountRepository.findByNumber(outputNo);
                 minusMoney.withdraw(outputMoney);
@@ -202,15 +185,7 @@ const app = async function () {
                 break;
             case 5: // 계좌번호로 검색
                 // 계좌 번호 입력 받아 계좌 정보 출력
-                let searchNum;
-                let findAccSearch = false;
-                while (!findAccSearch) {
-                    searchNum = await readLine("- 계좌번호 : ");
-                    findAccSearch = accountRepository.findByAll().find((account) => account.number === searchNum);
-                    if (!findAccSearch) {
-                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
-                    }
-                }
+                let searchNum = await errorAccount();
                 const findNumber = accountRepository.findByNumber(searchNum);
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t 잔액");
@@ -219,15 +194,7 @@ const app = async function () {
             case 6:
                 console.log("계좌 삭제");
                 // 계좌 번호 입력 받아 계좌 해당 계좌 삭제
-                let deleteNum;
-                let findAccDelete = false;
-                while (!findAccDelete) {
-                    deleteNum = await readLine("- 계좌번호 : ");
-                    findAccDelete = accountRepository.findByAll().find((account) => account.number === deleteNum);
-                    if (!findAccDelete) {
-                        console.log("틀린 계좌번호 입니다. 다시 입력해 주세요.");
-                    }
-                }
+                let deleteNum = await errorAccount();
                 accountRepository.deleteAccount(deleteNum);
                 console.log("-------------------------------------------------------");
                 console.log("계좌구분 \t 계좌번호 \t 예금주 \t 잔액");
