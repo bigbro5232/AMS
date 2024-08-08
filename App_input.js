@@ -111,9 +111,7 @@ const app = async function () {
                 let no;
                 while (true) {
                     no = parseInt(await readLine("> "));
-                    if (no === 1) {
-                        break;
-                    } else if (no === 2) {
+                    if (no === 1 || no === 2) {
                         break;
                     } else {
                         console.log("잘못 선택하셨습니다.");
