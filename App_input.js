@@ -4,6 +4,8 @@ const constants = require("fs").constants;
 const Account = require("./Account");
 const MinusAccount = require("./MinusAccount");
 const AccountRepository = require("./AccountRepository");
+const { readlink } = require("fs");
+const { Readline } = require("readline/promises");
 const accountRepository = new AccountRepository();
 
 // 키보드 입력을 위한 인터페이스 생성
@@ -106,10 +108,46 @@ const app = async function () {
                     "--------------------------------";
                 console.log(header);
                 let account = null;
-                let no = parseInt(await readLine("> "));
-                let accountNum = await readLine("- 계좌번호 : ");
-                let accountOwner = await readLine("- 예금주명 : ");
-                let password = parseInt(await readLine("- 비밀번호 : "));
+                let no;
+                while (true) {
+                    no = parseInt(await readLine("> "));
+                    if (no === 1) {
+                        break;
+                    } else if (no === 2) {
+                        break;
+                    } else {
+                        console.log("잘못 선택하셨습니다.");
+                    }
+                }
+                let accountNum;
+                while (true) {
+                    // 임의로 계좌번호는 8자리로 고정
+                    accountNum = await readLine("계좌번호 8자리를 입력해 주세요 : ");
+                    if (/^\d{8}$/.test(accountNum)) {
+                        break;
+                    } else {
+                        console.log("계좌번호는 8자리 숫자여야 합니다.");
+                    }
+                }
+                let accountOwner;
+                while (true) {
+                    accountOwner = await readLine("- 예금주명 : ");
+                    if (/^\W{2,}$/.test(accountOwner)) {
+                        break;
+                    } else {
+                        console.log("이름은 2자리 이상이여야 합니다.");
+                    }
+                }
+                let password;
+                while (true) {
+                    password = await readLine("비밀번호 4자리를 입력해 주세요 : ");
+                    if (/^\d{4}$/.test(password)) {
+                        break;
+                    } else {
+                        console.log("비밀번호는 4자리 숫자여야 합니다.");
+
+                    }
+                }
                 let balance = parseInt(await readLine("- 입금액 : "));
                 let minusBalance = 0;
                 if (no === 1) {
