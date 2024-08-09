@@ -98,7 +98,6 @@ async function errorAccount() {
     }
 }
 
-// 정규 표현식 입력문
 async function inputValid(inputMsg, errMsg, iValue) {
     while (true) {
         iValid = await readLine(inputMsg);
@@ -143,7 +142,7 @@ const app = async function () {
                 let accountNum = await inputValid("- 계좌번호 : ", "계좌번호는 8자리 숫자여야 합니다.", /^\d{8}$/);
                 let accountOwner = await inputValid("- 예금주명 : ", "이름은 2자리 이상이여야 합니다.", /^\W{2,}$/);
                 let password = await inputValid("- 비밀번호 : ", "비밀번호는 4자리 숫자여야 합니다.", /^\d{4}$/);
-                let balance = parseInt(await readLine("- 입금액 : "));
+                let balance = await inputValid("- 입금액 : ", "숫자만 입력할 수 있습니다.", /^\d{1,}$/);
                 let minusBalance = 0;
                 if (no === 1) {
                     account = new Account(accountNum, accountOwner, password, balance);
