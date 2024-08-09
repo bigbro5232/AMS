@@ -97,7 +97,7 @@ async function errorAccount() {
         }
     }
 }
-
+// 정규식 출력문
 async function inputValid(inputMsg, errMsg, iValue) {
     while (true) {
         iValid = await readLine(inputMsg);

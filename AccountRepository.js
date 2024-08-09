@@ -23,19 +23,7 @@ class AccountRepository {
     addAcount(account) {
         if (this.accounts.indexOf(account) === -1) {
             this.accounts.push(account)
-            // return fs.access("./javascript-advence/AMS-/accounts.txt", constants.F_OK)
-            //     .then(() => { })
-            //     .catch((error) => {
-            //         if (error.code !== "ENONET") {
-            //             return fs.writeFile("./javascript-advence/AMS-/accounts.txt", this.accounts.toString())
-            //                 .then(() => { })
-            //                 .catch((err) => { console.log(err); });
-            //         }
-            //         return console.error(error.message);
-            //     });
         } else {
-            // 기존에 예외처리 형식을 나타내기 위해 false값을 줬지만
-            // 예외처리 구문을 통해여 클래스에서 상속받아 구현
             return false;
         }
     }
@@ -53,14 +41,6 @@ class AccountRepository {
         //         console.log(error);
         //     }
         // })();
-
-        // fs.readFiles("./javascript-advence/AMS-/accounts")
-        //     .then((data) => {
-        //         data.toString();
-        //     })
-        //     .catch((error) => {
-        //         console.error(error.message);
-        //     });
     }
 
 
